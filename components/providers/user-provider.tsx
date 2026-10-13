@@ -26,7 +26,7 @@ export function UserProvider({
   initialUser,
 }: {
   children: React.ReactNode;
-  initialUser: User | null;
+  initialUser?: User | null;
 }) {
   const queryClient = useQueryClient();
 
@@ -40,7 +40,7 @@ export function UserProvider({
         return null;
       }
     },
-    initialData: initialUser,
+    initialData: initialUser ? initialUser : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes for session security
     initialDataUpdatedAt: () => (initialUser ? Date.now() : undefined),
   });

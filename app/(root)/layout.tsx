@@ -1,17 +1,14 @@
 import { UserProvider } from "@/components/providers/user-provider";
 import { MonthProvider } from "@/components/providers/month-provider";
 import { WorkspaceSidebar } from "./workspace-sidebar";
-import { fetchCurrentUser } from "@/lib/services/user.service";
 
-export default async function RootWorkspaceLayout({
+export default function RootWorkspaceLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await fetchCurrentUser();
-
   return (
-    <UserProvider initialUser={user}>
+    <UserProvider>
       <MonthProvider>
         <WorkspaceSidebar>{children}</WorkspaceSidebar>
       </MonthProvider>

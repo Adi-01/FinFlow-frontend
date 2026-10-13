@@ -2,17 +2,10 @@
 
 import { serverActionFetch } from "@/lib/api/fetchers";
 import type {
-  GetPaymentMethodsResponse,
   UserPaymentMethod,
   CreatePaymentMethodPayload,
   ApiResponse,
 } from "@/types/api";
-
-export async function getPaymentMethodsAction(): Promise<ApiResponse<GetPaymentMethodsResponse> | null> {
-  return serverActionFetch<GetPaymentMethodsResponse>("/payment-methods", {
-    method: "GET",
-  });
-}
 
 export async function createPaymentMethodAction(
   payload: CreatePaymentMethodPayload

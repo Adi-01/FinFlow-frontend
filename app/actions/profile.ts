@@ -8,15 +8,8 @@ import type {
   UpdateProfilePayload,
   ApiResponse,
   ChangePasswordPayload,
-  GetSessionsResponse,
   DeleteAccountPayload,
 } from "@/types/api";
-
-export async function getProfileAction(): Promise<ApiResponse<UserProfile> | null> {
-  return serverActionFetch<UserProfile>("/profile", {
-    method: "GET",
-  });
-}
 
 export async function updateProfileAction(
   payload: UpdateProfilePayload,
@@ -33,12 +26,6 @@ export async function changePasswordAction(
   return serverActionFetch<null>("/profile/account/change-password", {
     method: "POST",
     body: JSON.stringify(payload),
-  });
-}
-
-export async function getSessionsAction(): Promise<ApiResponse<GetSessionsResponse> | null> {
-  return serverActionFetch<GetSessionsResponse>("/profile/account/sessions", {
-    method: "GET",
   });
 }
 

@@ -74,7 +74,7 @@ const navItems = [
 export function WorkspaceSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUserContext();
+  const { user, isLoading: isUserLoading } = useUserContext();
   const queryClient = useQueryClient();
 
   const handleLogout = async () => {
@@ -171,25 +171,37 @@ export function WorkspaceSidebar({ children }: { children: React.ReactNode }) {
           {/* Sidebar Footer User Info & Logout */}
           <AnimatedSidebarFooter className="gap-2 border-t border-border p-2.5">
             <div className="flex items-center gap-2.5 overflow-hidden rounded-md p-1">
-              {user?.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt={user.name || "User"}
-                  className="size-8 shrink-0 rounded-full object-cover border border-border"
-                />
+              {isUserLoading && !user ? (
+                <>
+                  <div className="size-8 shrink-0 rounded-full bg-muted/60 animate-pulse" />
+                  <div className="min-w-0 flex-1 space-y-1.5 group-data-[state=collapsed]/sidebar:hidden">
+                    <div className="h-3 w-20 rounded bg-muted/60 animate-pulse" />
+                    <div className="h-2.5 w-28 rounded bg-muted/40 animate-pulse" />
+                  </div>
+                </>
               ) : (
-                <div className="grid size-8 shrink-0 place-items-center rounded-full bg-black/5 dark:bg-white/10 text-xs font-semibold text-foreground">
-                  {user ? user.name.substring(0, 2) : "FF"}
-                </div>
+                <>
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.name || "User"}
+                      className="size-8 shrink-0 rounded-full object-cover border border-border"
+                    />
+                  ) : (
+                    <div className="grid size-8 shrink-0 place-items-center rounded-full bg-black/5 dark:bg-white/10 text-xs font-semibold text-foreground">
+                      {user ? user.name.substring(0, 2) : "FF"}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 group-data-[state=collapsed]/sidebar:hidden">
+                    <span className="block truncate text-xs font-medium text-foreground">
+                      {user?.name || "Financial User"}
+                    </span>
+                    <span className="block truncate text-[11px] text-muted-foreground">
+                      {user?.email || "user@example.com"}
+                    </span>
+                  </div>
+                </>
               )}
-              <div className="min-w-0 flex-1 group-data-[state=collapsed]/sidebar:hidden">
-                <span className="block truncate text-xs font-medium text-foreground">
-                  {user?.name || "Financial User"}
-                </span>
-                <span className="block truncate text-[11px] text-muted-foreground">
-                  {user?.email || "user@example.com"}
-                </span>
-              </div>
               <button
                 type="button"
                 onClick={handleLogout}

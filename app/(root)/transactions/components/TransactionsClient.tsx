@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTransactions } from "@/lib/hooks/queries/useTransactions";
 import { useUserContext } from "@/components/providers/user-provider";
 import { TransactionFiltersBar } from "./TransactionFiltersBar";
@@ -13,25 +13,64 @@ import { Plus } from "lucide-react";
 import type { TransactionFilters } from "@/types/api";
 
 interface TransactionsClientProps {
-  initialFilters: TransactionFilters;
+  initialFilters?: TransactionFilters;
 }
 
 import { useMonthContext } from "@/components/providers/month-provider";
 
 export function TransactionsClient({
   initialFilters,
-}: TransactionsClientProps) {
+}: TransactionsClientProps = {}) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { monthStr } = useMonthContext();
 
-  const activeFilters = useMemo(
-    (): TransactionFilters => ({
-      ...initialFilters,
+  const activeFilters = useMemo((): TransactionFilters => {
+    const pageStr = searchParams.get("page");
+    const page = pageStr ? parseInt(pageStr, 10) : (initialFilters?.page ?? 1);
+
+    const rawType = searchParams.get("type") ?? initialFilters?.type;
+    const type =
+      rawType === "INCOME" || rawType === "EXPENSE" ? rawType : "ALL";
+
+    const minAmountStr = searchParams.get("minAmount");
+    const minAmount = minAmountStr
+      ? parseFloat(minAmountStr)
+      : initialFilters?.minAmount;
+
+    const maxAmountStr = searchParams.get("maxAmount");
+    const maxAmount = maxAmountStr
+      ? parseFloat(maxAmountStr)
+      : initialFilters?.maxAmount;
+
+    return {
+      page: isNaN(page) || page < 1 ? 1 : page,
+      type,
+      category: searchParams.get("category") || initialFilters?.category || undefined,
+      paymentMethod:
+        searchParams.get("paymentMethod") || initialFilters?.paymentMethod || undefined,
+      minAmount:
+        minAmount && !isNaN(minAmount) && minAmount > 0 ? minAmount : undefined,
+      maxAmount:
+        maxAmount && !isNaN(maxAmount) && maxAmount > 0 ? maxAmount : undefined,
+      startDate:
+        searchParams.get("startDate") || initialFilters?.startDate || undefined,
+      endDate:
+        searchParams.get("endDate") || initialFilters?.endDate || undefined,
+      search:
+        searchParams.get("search")?.trim() || initialFilters?.search || undefined,
+      sortBy:
+        (searchParams.get("sortBy") as "date" | "amount") ||
+        initialFilters?.sortBy ||
+        "date",
+      sortOrder:
+        (searchParams.get("sortOrder") as "asc" | "desc") ||
+        initialFilters?.sortOrder ||
+        "desc",
       month: monthStr,
-    }),
-    [initialFilters, monthStr]
-  );
+    };
+  }, [searchParams, initialFilters, monthStr]);
 
   const { data: transactionsData, isLoading } = useTransactions(activeFilters);
   const { currencySymbol } = useUserContext();
@@ -73,14 +112,14 @@ export function TransactionsClient({
   };
 
   const isFiltered = Boolean(
-    initialFilters.search ||
-      (initialFilters.type && initialFilters.type !== "ALL") ||
-      initialFilters.category ||
-      initialFilters.paymentMethod ||
-      initialFilters.minAmount ||
-      initialFilters.maxAmount ||
-      initialFilters.startDate ||
-      initialFilters.endDate,
+    activeFilters.search ||
+      (activeFilters.type && activeFilters.type !== "ALL") ||
+      activeFilters.category ||
+      activeFilters.paymentMethod ||
+      activeFilters.minAmount ||
+      activeFilters.maxAmount ||
+      activeFilters.startDate ||
+      activeFilters.endDate,
   );
 
   const hasTransactions = Boolean(
@@ -113,7 +152,7 @@ export function TransactionsClient({
 
       {/* Notion-like Modular Filters Bar */}
       <TransactionFiltersBar
-        filters={initialFilters}
+        filters={activeFilters}
         currencySymbol={currencySymbol}
         onFilterChange={handleFilterChange}
         onResetFilters={handleResetFilters}
@@ -123,7 +162,7 @@ export function TransactionsClient({
       <TransactionsTable
         data={transactionsData}
         currencySymbol={currencySymbol}
-        currentFilters={initialFilters}
+        currentFilters={activeFilters}
         onPageChange={handlePageChange}
         onSortChange={handleSortChange}
         onResetFilters={handleResetFilters}

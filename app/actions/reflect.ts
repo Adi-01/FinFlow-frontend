@@ -2,25 +2,12 @@
 
 import { serverActionFetch } from "@/lib/api/fetchers";
 import type {
-  GetReflectResponse,
   ReflectReport,
   GenerateReflectPayload,
   ChatReflectPayload,
   ChatReflectResponse,
   ApiResponse,
 } from "@/types/api";
-
-export async function getReflectReportAction(
-  year: number,
-  month: number,
-): Promise<ApiResponse<GetReflectResponse> | null> {
-  return serverActionFetch<GetReflectResponse>(
-    `/reflect?year=${year}&month=${month}`,
-    {
-      method: "GET",
-    },
-  );
-}
 
 export async function generateReflectReportAction(
   payload: GenerateReflectPayload,

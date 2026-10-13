@@ -2,18 +2,10 @@
 
 import { serverActionFetch } from "@/lib/api/fetchers";
 import type {
-  GetCategoriesResponse,
   UserCategory,
   CreateCategoryPayload,
   ApiResponse,
 } from "@/types/api";
-
-export async function getCategoriesAction(type?: string): Promise<ApiResponse<GetCategoriesResponse> | null> {
-  const query = type ? `?type=${type}` : "";
-  return serverActionFetch<GetCategoriesResponse>(`/categories${query}`, {
-    method: "GET",
-  });
-}
 
 export async function createCategoryAction(
   payload: CreateCategoryPayload
