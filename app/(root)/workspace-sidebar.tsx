@@ -152,7 +152,7 @@ export function WorkspaceSidebar({ children }: { children: React.ReactNode }) {
                       pathname === href || pathname.startsWith(`${href}/`);
                     return (
                       <AnimatedSidebarMenuItem key={href}>
-                        <Link href={href} className="w-full">
+                        <Link href={href} prefetch={true} className="w-full">
                           <AnimatedSidebarMenuButton
                             isActive={isActive}
                             icon={<Icon className="size-4" />}
