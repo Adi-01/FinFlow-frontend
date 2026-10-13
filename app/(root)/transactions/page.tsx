@@ -1,9 +1,3 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { fetchTransactions } from "@/lib/services/transactions.service";
-import { fetchCurrentUser } from "@/lib/services/user.service";
-import { parseMonthString, formatMonthString } from "@/lib/utils";
-import { QUERY_KEYS } from "@/lib/constants";
-import { isSoftNavigation } from "@/lib/server-utils";
 import { TransactionsClient } from "./components/TransactionsClient";
 import type { TransactionFilters } from "@/types/api";
 
@@ -53,29 +47,5 @@ export default async function TransactionsPage({
     sortOrder: resolvedParams.sortOrder || "desc",
   };
 
-  if (await isSoftNavigation()) {
-    return <TransactionsClient initialFilters={filters} />;
-  }
-
-  const user = await fetchCurrentUser();
-  const { year, month } = parseMonthString(user?.settings?.selectedMonth);
-  const monthStr = formatMonthString(year, month);
-  const fullFilters: TransactionFilters = { ...filters, month: monthStr };
-
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: QUERY_KEYS.transactions.list(fullFilters),
-    queryFn: async () => {
-      const data = await fetchTransactions(fullFilters);
-      if (!data) throw new Error("Transactions not found");
-      return data;
-    },
-  });
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <TransactionsClient initialFilters={fullFilters} />
-    </HydrationBoundary>
-  );
+  return <TransactionsClient initialFilters={filters} />;
 }
