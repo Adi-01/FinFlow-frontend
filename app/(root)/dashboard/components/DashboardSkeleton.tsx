@@ -1,4 +1,4 @@
-export default function DashboardLoading() {
+export function DashboardSkeleton() {
   return (
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -6,10 +6,8 @@ export default function DashboardLoading() {
           <div>
             <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">
               <span>Welcome</span>
-
               <span className="inline-block h-5 w-20 rounded-md bg-muted shimmer shimmer-bg" />
             </h1>
-
             <p className="text-xs text-muted-foreground">
               Monthly Financial Overview
             </p>
@@ -39,3 +37,4 @@ export default function DashboardLoading() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-export default function ProfileLoading() {
+export function ProfileSkeleton() {
   return (
     <div className="mx-auto flex h-full max-w-3xl flex-col">
       {/* Fixed Top Section Skeleton */}
@@ -81,3 +81,4 @@ export default function ProfileLoading() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-export default function TransactionsLoading() {
+export function TransactionsSkeleton() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header and Action Button Shell */}
@@ -83,3 +83,4 @@ export default function TransactionsLoading() {
     </div>
   );
 }
+

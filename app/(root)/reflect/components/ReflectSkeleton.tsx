@@ -1,4 +1,4 @@
-export default function ReflectLoading() {
+export function ReflectSkeleton() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0 space-y-10 pb-16">
       {/* 2. Document Editorial Header */}
@@ -182,3 +182,4 @@ export default function ReflectLoading() {
     </div>
   );
 }
+

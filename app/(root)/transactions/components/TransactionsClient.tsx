@@ -7,6 +7,7 @@ import { useUserContext } from "@/components/providers/user-provider";
 import { TransactionFiltersBar } from "./TransactionFiltersBar";
 import { TransactionsTable } from "./TransactionsTable";
 import { AddTransactionModal } from "./AddTransactionModal";
+import { TransactionsSkeleton } from "./TransactionsSkeleton";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { TransactionFilters } from "@/types/api";
@@ -32,9 +33,12 @@ export function TransactionsClient({
     [initialFilters, monthStr]
   );
 
-  // Suspense query backed by centralized hierarchical QUERY_KEYS
-  const { data: transactionsData } = useTransactions(activeFilters);
+  const { data: transactionsData, isLoading } = useTransactions(activeFilters);
   const { currencySymbol } = useUserContext();
+
+  if (isLoading || !transactionsData) {
+    return <TransactionsSkeleton />;
+  }
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(window.location.search);

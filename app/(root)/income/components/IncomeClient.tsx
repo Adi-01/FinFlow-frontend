@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useIncomes } from "@/lib/hooks/queries/useIncomeQueries";
 import { IncomeTable } from "./IncomeTable";
 import { AddIncomeModal } from "./AddIncomeModal";
+import { IncomeSkeleton } from "./IncomeSkeleton";
 import { useUserContext } from "@/components/providers/user-provider";
 import type { IncomeFilters } from "@/types/api";
 
@@ -29,7 +30,12 @@ export function IncomeClient() {
     month: monthStr,
   };
 
-  const { data } = useIncomes(filters);
+  const { data, isLoading } = useIncomes(filters);
+
+  if (isLoading || !data) {
+    return <IncomeSkeleton />;
+  }
+
   const hasIncomes = Boolean(data?.items && data.items.length > 0);
 
   const handlePageChange = (newPage: number) => {

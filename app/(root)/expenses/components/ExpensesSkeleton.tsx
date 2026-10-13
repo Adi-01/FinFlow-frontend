@@ -1,4 +1,4 @@
-export default function ExpensesLoading() {
+export function ExpensesSkeleton() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header and Action Button Shell */}
@@ -63,3 +63,4 @@ export default function ExpensesLoading() {
     </div>
   );
 }
+

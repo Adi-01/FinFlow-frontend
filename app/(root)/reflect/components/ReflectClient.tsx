@@ -9,7 +9,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSuspenseReflectReport } from "@/lib/hooks/queries/useReflectQueries";
+import { useReflectReport } from "@/lib/hooks/queries/useReflectQueries";
 import { useGenerateReflect } from "@/lib/hooks/mutations/useReflectMutations";
 import { useUserContext } from "@/components/providers/user-provider";
 import { formatDateTime, formatMonthYear } from "@/lib/utils";
@@ -20,6 +20,7 @@ import { EditorialCategoryBreakdown } from "./EditorialCategoryBreakdown";
 import { EditorialHabitsAndNotes } from "./EditorialHabitsAndNotes";
 import { EditorialActionPlan } from "./EditorialActionPlan";
 import { ReflectChatDrawer } from "./ReflectChatDrawer";
+import { ReflectSkeleton } from "./ReflectSkeleton";
 import { useMonthContext } from "@/components/providers/month-provider";
 
 
@@ -89,28 +90,29 @@ export function ReflectClient() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data: reflectData } = useSuspenseReflectReport(year, month);
-  const { report, transactionCount = 0, limits } = reflectData;
-
-  // Debug log: logs once on load or when data updates, not on re-renders
-  // useEffect(() => {
-  //   console.log("[Reflect Data ---> ]", reflectData);
-  // }, [reflectData]);
+  const { data: reflectData, isLoading } = useReflectReport(year, month);
+  const limits = reflectData?.limits;
 
   const serverCooldown = limits?.generate?.cooldownRemainingSeconds ?? 0;
   const cooldownCountdown = useCooldownCountdown(serverCooldown);
-
-  const canGenerate = limits
-    ? limits.generate.canGenerate &&
-      limits.generate.dailyRemaining > 0 &&
-      cooldownCountdown === 0
-    : true;
 
   const monthName = formatMonthYear(year, month);
 
   const generateMutation = useGenerateReflect(() => {
     setErrorMessage(null);
   });
+
+  if (isLoading || !reflectData) {
+    return <ReflectSkeleton />;
+  }
+
+  const { report, transactionCount = 0 } = reflectData;
+
+  const canGenerate = limits
+    ? limits.generate.canGenerate &&
+      limits.generate.dailyRemaining > 0 &&
+      cooldownCountdown === 0
+    : true;
 
   const handleGenerate = (regenerate = false) => {
     if (!canGenerate || generateMutation.isPending) return;

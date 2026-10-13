@@ -14,9 +14,10 @@ import { PersonalTabContent } from "./PersonalTabContent";
 import { AccountTabContent } from "./AccountTabContent";
 import { CollectionsTabContent } from "./CollectionsTabContent";
 import { ImageCropModal } from "./ImageCropModal";
+import { ProfileSkeleton } from "./ProfileSkeleton";
 
 export function ProfileClient() {
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
   const { data: paymentMethodsData } = usePaymentMethods();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
   const { mutate: uploadAvatar, isPending: isUploadingAvatar } = useUploadAvatarMutation();
@@ -64,6 +65,10 @@ export function ProfileClient() {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [activeTab]);
+
+  if (isLoading || !profile) {
+    return <ProfileSkeleton />;
+  }
 
   const handleReset = () => {
     if (profile) {

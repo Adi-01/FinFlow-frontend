@@ -10,6 +10,7 @@ import { DashboardHeader } from "./DashboardHeader";
 import { DashboardStats } from "./DashboardStats";
 import { DashboardCharts } from "./DashboardCharts";
 import { AllowanceModal } from "./AllowanceModal";
+import { DashboardSkeleton } from "./DashboardSkeleton";
 import { AddTransactionModal } from "@/app/(root)/transactions/components/AddTransactionModal";
 import { useUserContext } from "@/components/providers/user-provider";
 import { useMonthContext } from "@/components/providers/month-provider";
@@ -21,7 +22,7 @@ export function DashboardClient() {
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
   const [allowanceInput, setAllowanceInput] = useState("");
 
-  const { data: dashboardData } = useDashboardMetrics(year, month);
+  const { data: dashboardData, isLoading } = useDashboardMetrics(year, month);
 
   const { currencySymbol } = useUserContext();
 
@@ -41,6 +42,10 @@ export function DashboardClient() {
     setAllowanceInput(initialValue.toString());
     setIsAllowanceModalOpen(true);
   };
+
+  if (isLoading || !dashboardData) {
+    return <DashboardSkeleton />;
+  }
 
   const {
     summary,

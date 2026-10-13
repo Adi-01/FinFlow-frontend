@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useExpenses } from "@/lib/hooks/queries/useExpenseQueries";
 import { ExpensesTable } from "./ExpensesTable";
 import { AddExpenseModal } from "./AddExpenseModal";
+import { ExpensesSkeleton } from "./ExpensesSkeleton";
 import { useUserContext } from "@/components/providers/user-provider";
 
 import { formatMonthString } from "@/lib/utils";
@@ -31,7 +32,12 @@ export function ExpensesClient() {
     month: monthStr,
   };
 
-  const { data } = useExpenses(filters);
+  const { data, isLoading } = useExpenses(filters);
+
+  if (isLoading || !data) {
+    return <ExpensesSkeleton />;
+  }
+
   const hasExpenses = Boolean(data?.items && data.items.length > 0);
 
   const handlePageChange = (newPage: number) => {

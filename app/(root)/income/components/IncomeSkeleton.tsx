@@ -1,4 +1,4 @@
-export default function IncomeLoading() {
+export function IncomeSkeleton() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header and Action Button Shell */}
@@ -63,3 +63,4 @@ export default function IncomeLoading() {
     </div>
   );
 }
+
