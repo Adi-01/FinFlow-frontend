@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import {
   createCategoryAction,
   deleteCategoryAction,
@@ -15,7 +16,7 @@ export function useCreateCategory(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: CreateCategoryPayload) => {
-      const res = await createCategoryAction(payload);
+      const res = await createCategoryAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to create custom category");
       }
@@ -89,7 +90,7 @@ export function useDeleteCategory(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await deleteCategoryAction(id);
+      const res = await deleteCategoryAction(id, getClientId());
       if (!res || !res.success) {
         throw new Error(res?.message || "Failed to delete category");
       }

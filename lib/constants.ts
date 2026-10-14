@@ -54,6 +54,8 @@ export const QUERY_KEYS = {
     all: ["reflect"] as const,
     byMonth: (year: number, month: number) =>
       [...QUERY_KEYS.reflect.all, year, month] as const,
+    generating: ["reflect", "generating"] as const,
+    chatting: ["reflect", "chatting"] as const,
   },
 } as const;
 

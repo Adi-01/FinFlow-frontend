@@ -13,6 +13,8 @@ import { useReflectReport } from "@/lib/hooks/queries/useReflectQueries";
 import { useGenerateReflect } from "@/lib/hooks/mutations/useReflectMutations";
 import { useUserContext } from "@/components/providers/user-provider";
 import { formatDateTime, formatMonthYear } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/lib/constants";
 import { InsufficientTransactionsState } from "./InsufficientTransactionsState";
 import { EditorialPersonalityHero } from "./EditorialPersonalityHero";
 import { EditorialCashflowSummary } from "./EditorialCashflowSummary";
@@ -90,6 +92,12 @@ export function ReflectClient() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const { data: isGeneratingElsewhere } = useQuery({
+    queryKey: QUERY_KEYS.reflect.generating,
+    queryFn: () => false,
+    initialData: false,
+  });
+
   const { data: reflectData, isLoading } = useReflectReport(year, month);
   const limits = reflectData?.limits;
 
@@ -111,11 +119,12 @@ export function ReflectClient() {
   const canGenerate = limits
     ? limits.generate.canGenerate &&
       limits.generate.dailyRemaining > 0 &&
-      cooldownCountdown === 0
-    : true;
+      cooldownCountdown === 0 &&
+      !isGeneratingElsewhere
+    : !isGeneratingElsewhere;
 
   const handleGenerate = (regenerate = false) => {
-    if (!canGenerate || generateMutation.isPending) return;
+    if (!canGenerate || generateMutation.isPending || isGeneratingElsewhere) return;
     setErrorMessage(null);
     generateMutation.mutate(
       { year, month, regenerate },
@@ -129,6 +138,9 @@ export function ReflectClient() {
 
   // Label describing why generation is currently blocked if applicable
   const getDisabledReason = () => {
+    if (isGeneratingElsewhere) {
+      return "Generating on another tab...";
+    }
     if (!limits) return null;
     if (cooldownCountdown > 0) {
       return `Cooldown (${formatCooldown(cooldownCountdown)})`;
@@ -191,13 +203,15 @@ export function ReflectClient() {
               size="lg"
               variant="pill"
               onClick={() => handleGenerate(false)}
-              disabled={!canGenerate || generateMutation.isPending}
+              disabled={!canGenerate || generateMutation.isPending || isGeneratingElsewhere}
               className="gap-2 font-medium px-6 cursor-pointer h-10 text-sm"
             >
-              {generateMutation.isPending ? (
+              {generateMutation.isPending || isGeneratingElsewhere ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Generating Reflection...
+                  {isGeneratingElsewhere
+                    ? "Generating on another tab..."
+                    : "Generating Reflection..."}
                 </>
               ) : disabledReason ? (
                 `Generate (${disabledReason})`
@@ -315,7 +329,7 @@ export function ReflectClient() {
               variant="ghost"
               size="sm"
               onClick={() => handleGenerate(true)}
-              disabled={!canGenerate || generateMutation.isPending}
+              disabled={!canGenerate || generateMutation.isPending || isGeneratingElsewhere}
               className="rounded-full gap-1.5 text-xs font-medium cursor-pointer h-8 px-3 text-foreground hover:bg-muted disabled:opacity-50"
               title={
                 disabledReason
@@ -324,10 +338,12 @@ export function ReflectClient() {
               }
             >
               <RefreshCw
-                className={`size-3.5 ${generateMutation.isPending ? "animate-spin" : ""}`}
+                className={`size-3.5 ${generateMutation.isPending || isGeneratingElsewhere ? "animate-spin" : ""}`}
               />
               {generateMutation.isPending
                 ? "Regenerating..."
+                : isGeneratingElsewhere
+                ? "Generating on another tab..."
                 : disabledReason || "Regenerate"}
             </Button>
           </div>

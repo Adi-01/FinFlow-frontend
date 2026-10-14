@@ -32,6 +32,7 @@ import {
   useDeleteAccountMutation,
 } from "@/lib/hooks/mutations/useProfileMutations";
 import { useProfileSessionsQuery } from "@/lib/hooks/queries/useProfileQueries";
+import { formatRelativeTime, formatSessionSignIn } from "@/lib/utils";
 
 export function AccountTabContent() {
   // 1. Password Dialog State
@@ -147,6 +148,27 @@ export function AccountTabContent() {
       return Smartphone;
     }
     return Monitor;
+  };
+
+  const formatDeviceName = (ua: string) => {
+    if (!ua || ua === "node" || ua === "Unknown Device") return "Current Browser";
+    const uaLower = ua.toLowerCase();
+
+    let browser = "Browser";
+    if (uaLower.includes("edg/")) browser = "Edge";
+    else if (uaLower.includes("chrome") && !uaLower.includes("chromium")) browser = "Chrome";
+    else if (uaLower.includes("safari") && !uaLower.includes("chrome")) browser = "Safari";
+    else if (uaLower.includes("firefox")) browser = "Firefox";
+    else if (uaLower.includes("opera") || uaLower.includes("opr/")) browser = "Opera";
+
+    let os = "Device";
+    if (uaLower.includes("macintosh") || uaLower.includes("mac os")) os = "macOS";
+    else if (uaLower.includes("windows")) os = "Windows";
+    else if (uaLower.includes("android")) os = "Android";
+    else if (uaLower.includes("iphone") || uaLower.includes("ipad")) os = "iOS";
+    else if (uaLower.includes("linux")) os = "Linux";
+
+    return `${browser} on ${os}`;
   };
 
   // 4. Danger Zone Deletion State
@@ -467,12 +489,19 @@ export function AccountTabContent() {
                           <div className="flex items-center gap-3 min-w-0">
                             <DeviceIcon className="size-5 text-muted-foreground shrink-0" />
                             <div className="space-y-0.5 min-w-0">
-                              <p className="text-xs font-medium truncate">
-                                {sess.userAgent}
+                              <p
+                                className="text-xs font-medium truncate"
+                                title={sess.userAgent}
+                              >
+                                {formatDeviceName(sess.userAgent)}
                               </p>
                               <p className="text-[11px] text-muted-foreground">
-                                IP: {sess.ip} • Active:{" "}
-                                {new Date(sess.lastActive).toLocaleDateString()}
+                                Signed in: {formatSessionSignIn(sess.createdAt || sess.lastActive)}
+                                {!sess.isCurrent && sess.lastActive && (
+                                  <>
+                                    {" "}• Last active: {formatRelativeTime(sess.lastActive)}
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>

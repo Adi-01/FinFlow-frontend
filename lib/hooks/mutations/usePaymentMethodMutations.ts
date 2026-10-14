@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import {
   createPaymentMethodAction,
   deletePaymentMethodAction,
@@ -15,7 +16,7 @@ export function useCreatePaymentMethod(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: CreatePaymentMethodPayload) => {
-      const res = await createPaymentMethodAction(payload);
+      const res = await createPaymentMethodAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to create custom payment method");
       }
@@ -79,7 +80,7 @@ export function useDeletePaymentMethod(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await deletePaymentMethodAction(id);
+      const res = await deletePaymentMethodAction(id, getClientId());
       if (!res || !res.success) {
         throw new Error(res?.message || "Failed to delete payment method");
       }

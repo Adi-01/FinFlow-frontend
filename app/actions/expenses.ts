@@ -4,10 +4,12 @@ import { serverActionFetch } from "@/lib/api/fetchers";
 import type { CreateExpensePayload, Expense, ApiResponse } from "@/types/api";
 
 export async function addExpenseAction(
-  payload: CreateExpensePayload
+  payload: CreateExpensePayload,
+  clientId?: string
 ): Promise<ApiResponse<Expense> | null> {
   return serverActionFetch<Expense>("/expenses", {
     method: "POST",
     body: JSON.stringify(payload),
+    clientId,
   });
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import { updateAllowanceAction } from "@/app/actions/dashboard";
 import type { DashboardMetrics, AllowanceSummary } from "@/types/api";
 
@@ -12,7 +13,10 @@ export function useUpdateAllowance(
 
   return useMutation({
     mutationFn: async (amount: number) => {
-      const res = await updateAllowanceAction({ year, month, amount });
+      const res = await updateAllowanceAction(
+        { year, month, amount },
+        getClientId(),
+      );
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to update allowance");
       }

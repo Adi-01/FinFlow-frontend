@@ -8,18 +8,22 @@ import type {
 } from "@/types/api";
 
 export async function createPaymentMethodAction(
-  payload: CreatePaymentMethodPayload
+  payload: CreatePaymentMethodPayload,
+  clientId?: string
 ): Promise<ApiResponse<UserPaymentMethod> | null> {
   return serverActionFetch<UserPaymentMethod>("/payment-methods", {
     method: "POST",
     body: JSON.stringify(payload),
+    clientId,
   });
 }
 
 export async function deletePaymentMethodAction(
-  id: string
+  id: string,
+  clientId?: string
 ): Promise<ApiResponse<null> | null> {
   return serverActionFetch<null>(`/payment-methods/${id}`, {
     method: "DELETE",
+    clientId,
   });
 }

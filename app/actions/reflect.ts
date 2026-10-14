@@ -11,18 +11,22 @@ import type {
 
 export async function generateReflectReportAction(
   payload: GenerateReflectPayload,
+  clientId?: string,
 ): Promise<ApiResponse<ReflectReport> | null> {
   return serverActionFetch<ReflectReport>("/reflect/generate", {
     method: "POST",
     body: JSON.stringify(payload),
+    clientId,
   });
 }
 
 export async function chatReflectAction(
   payload: ChatReflectPayload,
+  clientId?: string,
 ): Promise<ApiResponse<ChatReflectResponse> | null> {
   return serverActionFetch<ChatReflectResponse>("/reflect/chat", {
     method: "POST",
     body: JSON.stringify(payload),
+    clientId,
   });
 }

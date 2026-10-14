@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import {
   generateReflectReportAction,
   chatReflectAction,
@@ -11,7 +12,7 @@ export function useGenerateReflect(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: GenerateReflectPayload) => {
-      const res = await generateReflectReportAction(payload);
+      const res = await generateReflectReportAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to generate reflection report");
       }
@@ -38,7 +39,7 @@ export function useGenerateReflect(onSuccessCallback?: () => void) {
 export function useChatReflect() {
   return useMutation({
     mutationFn: async (payload: ChatReflectPayload) => {
-      const res = await chatReflectAction(payload);
+      const res = await chatReflectAction(payload, getClientId());
       if (!res || !res.success) {
         throw new Error(res?.message || "Failed to send message to AI");
       }

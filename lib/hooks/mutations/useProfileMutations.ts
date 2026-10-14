@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfileAction } from "@/app/actions/profile";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import type {
   UpdateProfilePayload,
   UserProfile,
@@ -13,7 +14,7 @@ export function useUpdateProfile(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: UpdateProfilePayload) => {
-      const res = await updateProfileAction(payload);
+      const res = await updateProfileAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to update profile");
       }
@@ -189,7 +190,7 @@ export function useRevokeSessionMutation() {
   return useMutation({
     mutationFn: async (sessionId: string) => {
       const { revokeSessionAction } = await import("@/app/actions/profile");
-      const res = await revokeSessionAction(sessionId);
+      const res = await revokeSessionAction(sessionId, getClientId());
       if (!res || !res.success) {
         throw new Error(res?.message || "Failed to revoke session");
       }
@@ -206,7 +207,7 @@ export function useRevokeOtherSessionsMutation() {
   return useMutation({
     mutationFn: async () => {
       const { revokeAllOtherSessionsAction } = await import("@/app/actions/profile");
-      const res = await revokeAllOtherSessionsAction();
+      const res = await revokeAllOtherSessionsAction(getClientId());
       if (!res || !res.success) {
         throw new Error(res?.message || "Failed to revoke other sessions");
       }
@@ -241,7 +242,7 @@ export function useUploadAvatarMutation() {
   return useMutation({
     mutationFn: async (formData: FormData) => {
       const { uploadAvatarAction } = await import("@/app/actions/profile");
-      const res = await uploadAvatarAction(formData);
+      const res = await uploadAvatarAction(formData, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to upload avatar");
       }
@@ -259,7 +260,7 @@ export function useRemoveAvatarMutation() {
   return useMutation({
     mutationFn: async () => {
       const { removeAvatarAction } = await import("@/app/actions/profile");
-      const res = await removeAvatarAction();
+      const res = await removeAvatarAction(getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to remove avatar");
       }

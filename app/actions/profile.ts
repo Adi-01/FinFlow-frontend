@@ -11,12 +11,16 @@ import type {
   DeleteAccountPayload,
 } from "@/types/api";
 
+import { headers as nextHeaders } from "next/headers";
+
 export async function updateProfileAction(
   payload: UpdateProfilePayload,
+  clientId?: string,
 ): Promise<ApiResponse<UserProfile> | null> {
   return serverActionFetch<UserProfile>("/profile", {
     method: "PATCH",
     body: JSON.stringify(payload),
+    clientId,
   });
 }
 
@@ -31,11 +35,13 @@ export async function changePasswordAction(
 
 export async function revokeSessionAction(
   sessionId: string,
+  clientId?: string,
 ): Promise<ApiResponse<{ revokedSessionId: string; wasCurrent: boolean }> | null> {
   const res = await serverActionFetch<{ revokedSessionId: string; wasCurrent: boolean }>(
     `/profile/account/sessions/${sessionId}`,
     {
       method: "DELETE",
+      clientId,
     },
   );
 
@@ -46,9 +52,12 @@ export async function revokeSessionAction(
   return res;
 }
 
-export async function revokeAllOtherSessionsAction(): Promise<ApiResponse<{ revokedCount: number }> | null> {
+export async function revokeAllOtherSessionsAction(
+  clientId?: string,
+): Promise<ApiResponse<{ revokedCount: number }> | null> {
   return serverActionFetch<{ revokedCount: number }>("/profile/account/sessions", {
     method: "DELETE",
+    clientId,
   });
 }
 
@@ -69,6 +78,7 @@ export async function deleteAccountAction(
 
 export async function uploadAvatarAction(
   formData: FormData,
+  clientId?: string,
 ): Promise<ApiResponse<UserProfile> | null> {
   let token: string | undefined;
   try {
@@ -79,6 +89,22 @@ export async function uploadAvatarAction(
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
+
+  if (clientId) {
+    headers["x-client-id"] = clientId;
+  }
+
+  try {
+    const reqHeaders = await nextHeaders();
+    const ua = reqHeaders.get("user-agent");
+    if (ua && !headers["x-forwarded-user-agent"]) {
+      headers["x-forwarded-user-agent"] = ua;
+    }
+    const incomingCid = reqHeaders.get("x-client-id");
+    if (incomingCid && !headers["x-client-id"]) {
+      headers["x-client-id"] = incomingCid;
+    }
+  } catch {}
 
   const response = await fetch(`${BACKEND_URL}/profile/avatar`, {
     method: "PATCH",
@@ -100,9 +126,12 @@ export async function uploadAvatarAction(
   return data;
 }
 
-export async function removeAvatarAction(): Promise<ApiResponse<UserProfile> | null> {
+export async function removeAvatarAction(
+  clientId?: string,
+): Promise<ApiResponse<UserProfile> | null> {
   return serverActionFetch<UserProfile>("/profile/avatar", {
     method: "DELETE",
+    clientId,
   });
 }
 

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { getClientId } from "@/lib/sync/clientId";
 import { addIncomeAction } from "@/app/actions/income";
 import { addExpenseAction } from "@/app/actions/expenses";
 import type {
@@ -124,7 +125,7 @@ export function useAddIncome(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: CreateIncomePayload) => {
-      const res = await addIncomeAction(payload);
+      const res = await addIncomeAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to add income");
       }
@@ -306,7 +307,7 @@ export function useAddExpense(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: async (payload: CreateExpensePayload) => {
-      const res = await addExpenseAction(payload);
+      const res = await addExpenseAction(payload, getClientId());
       if (!res || !res.success || !res.data) {
         throw new Error(res?.message || "Failed to add expense");
       }

@@ -1,4 +1,5 @@
 import { ApiError } from "./ApiError";
+import { getClientId } from "@/lib/sync/clientId";
 
 /**
  * Browser-side fetch wrapper for React Query hooks.
@@ -14,6 +15,13 @@ export async function reactQueryFetch<T>(
   let requestHeaders: Record<string, string> = {
     ...((options.headers as Record<string, string>) || {}),
   };
+
+  if (!isServer) {
+    const clientId = getClientId();
+    if (clientId && !requestHeaders["x-client-id"]) {
+      requestHeaders["x-client-id"] = clientId;
+    }
+  }
 
   let url = endpoint;
   if (isServer) {

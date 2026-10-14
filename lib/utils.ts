@@ -292,4 +292,75 @@ export function getCurrentMonthMaxDate(): string {
   return `${year}-${monthStr}-${dayStr}`;
 }
 
+/**
+ * Format relative time (e.g. "just now", "5 mins ago", "1 hr ago", "1 day ago", "1 week ago", "1 month ago")
+ */
+export function formatRelativeTime(dateInput?: string | Date | number): string {
+  if (!dateInput) return "";
+  const date =
+    typeof dateInput === "string" || typeof dateInput === "number"
+      ? new Date(dateInput)
+      : dateInput;
+  if (isNaN(date.getTime())) return "";
+
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return "just now";
+
+  const diffSeconds = Math.floor(diffMs / 1000);
+  if (diffSeconds < 60) return "just now";
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) {
+    return diffMinutes === 1 ? "1 min ago" : `${diffMinutes} mins ago`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return diffHours === 1 ? "1 hr ago" : `${diffHours} hrs ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
+  }
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffDays < 30) {
+    return diffWeeks === 1 ? "1 week ago" : `${diffWeeks} weeks ago`;
+  }
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) {
+    return diffMonths === 1 ? "1 month ago" : `${diffMonths} months ago`;
+  }
+
+  const diffYears = Math.floor(diffDays / 365);
+  return diffYears === 1 ? "1 year ago" : `${diffYears} years ago`;
+}
+
+/**
+ * Format session creation / sign-in timestamp (e.g. "Oct 14 at 9:15 PM")
+ */
+export function formatSessionSignIn(dateInput?: string | Date): string {
+  if (!dateInput) return "";
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) return "";
+
+  const isCurrentYear = date.getFullYear() === new Date().getFullYear();
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(isCurrentYear ? {} : { year: "numeric" }),
+  }).format(date);
+
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+
+  return `${datePart} at ${timePart}`;
+}
+
+
 

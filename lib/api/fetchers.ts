@@ -5,10 +5,12 @@ import { getSessionCookie, removeSessionCookie } from "../auth";
 import { redirect } from "next/navigation";
 import { ApiError } from "./ApiError";
 import { NextResponse } from "next/server";
+import { headers as nextHeaders } from "next/headers";
 import type { ApiResponse } from "@/types/api";
 
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
+  clientId?: string;
 }
 
 /**
@@ -28,6 +30,28 @@ async function coreFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
     "Content-Type": "application/json",
     ...options.headers,
   };
+
+  if (options.clientId) {
+    headers["x-client-id"] = options.clientId;
+  }
+
+  try {
+    const reqHeaders = await nextHeaders();
+    const userAgent = reqHeaders.get("user-agent");
+    if (userAgent && !headers["x-forwarded-user-agent"]) {
+      headers["x-forwarded-user-agent"] = userAgent;
+    }
+    const xForwardedFor = reqHeaders.get("x-forwarded-for");
+    if (xForwardedFor && !headers["x-forwarded-for"]) {
+      headers["x-forwarded-for"] = xForwardedFor;
+    }
+    const incomingClientId = reqHeaders.get("x-client-id");
+    if (incomingClientId && !headers["x-client-id"]) {
+      headers["x-client-id"] = incomingClientId;
+    }
+  } catch {
+    // nextHeaders() may throw if called outside request context
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
