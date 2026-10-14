@@ -25,7 +25,8 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    const result = await registerAction({ name, email, password });
+    const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : undefined;
+    const result = await registerAction({ name, email, password, userAgent });
 
     if (result.success) {
       queryClient.clear();

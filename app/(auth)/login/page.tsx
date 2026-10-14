@@ -24,7 +24,8 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const result = await loginAction({ email, password });
+    const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : undefined;
+    const result = await loginAction({ email, password, userAgent });
 
     if (result.success) {
       queryClient.clear();

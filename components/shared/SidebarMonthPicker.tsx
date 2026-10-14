@@ -10,10 +10,12 @@ import {
 import { MonthYearWheelPicker } from "@/components/shared/MonthYearWheelPicker";
 import { useMonthContext } from "@/components/providers/month-provider";
 import { formatMonthYear } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SidebarMonthPicker() {
   const { year, month, setYearMonth } = useMonthContext();
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const formattedMonth = formatMonthYear(year, month);
 
@@ -40,10 +42,11 @@ export function SidebarMonthPicker() {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 bg-card border-border shadow-lg"
-        align="start"
-        side="right"
+        className="w-auto p-0 bg-card border-border shadow-lg z-50"
+        align={isMobile ? "center" : "start"}
+        side={isMobile ? "bottom" : "right"}
         sideOffset={8}
+        collisionPadding={12}
       >
         <MonthYearWheelPicker
           year={year}

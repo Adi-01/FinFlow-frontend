@@ -7,18 +7,27 @@ import type { AuthResponse } from "@/types/api";
 export interface LoginPayload {
   email: string;
   password: string;
+  userAgent?: string;
 }
 
 export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+  userAgent?: string;
 }
 
 export async function loginAction(payload: LoginPayload) {
+  const customHeaders: Record<string, string> = {};
+  if (payload.userAgent) {
+    customHeaders["x-client-device"] = payload.userAgent;
+    customHeaders["x-forwarded-user-agent"] = payload.userAgent;
+  }
+
   const res = await serverActionFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
+    headers: customHeaders,
   });
 
   if (res.success && res.data?.sessionToken) {
@@ -37,9 +46,16 @@ export async function loginAction(payload: LoginPayload) {
 }
 
 export async function registerAction(payload: RegisterPayload) {
+  const customHeaders: Record<string, string> = {};
+  if (payload.userAgent) {
+    customHeaders["x-client-device"] = payload.userAgent;
+    customHeaders["x-forwarded-user-agent"] = payload.userAgent;
+  }
+
   const res = await serverActionFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify(payload),
+    headers: customHeaders,
   });
 
   if (res.success && res.data?.sessionToken) {
