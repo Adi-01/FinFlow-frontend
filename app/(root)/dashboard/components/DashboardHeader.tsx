@@ -7,14 +7,21 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ onAddTransaction }: DashboardHeaderProps) {
-  const { user } = useUserContext();
+  const { user, isLoading } = useUserContext();
+
+  const firstName = user?.name ? user.name.trim().split(" ")[0] : null;
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-foreground">
-            Welcome {user?.name.split(" ")[0] || "User"}
+          <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2 min-h-[28px]">
+            <span>Welcome</span>
+            {isLoading || !firstName ? (
+              <span className="inline-block h-5 w-20 rounded-md bg-muted shimmer shimmer-bg align-middle" />
+            ) : (
+              <span>{firstName}</span>
+            )}
           </h1>
           <p className="text-xs text-muted-foreground">
             Monthly Financial Overview
