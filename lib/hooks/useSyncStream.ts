@@ -43,6 +43,8 @@ export function useSyncStream() {
     let idleTimer: NodeJS.Timeout | null = null;
     let reconnectDelay = 1000;
     let isCleanedUp = false;
+    let isConnecting = false;
+    let isIdle = false;
 
     const scheduleInvalidate = (key: readonly unknown[]) => {
       const serializedKey = JSON.stringify(key);
@@ -51,6 +53,7 @@ export function useSyncStream() {
         clearTimeout(existing);
       }
 
+      // Fast 16ms animation-frame throttle to prevent duplicate refetches while keeping updates instant
       const timer = setTimeout(() => {
         debounceTimersRef.current.delete(serializedKey);
         queryClient.invalidateQueries({ queryKey: key });
@@ -138,6 +141,7 @@ export function useSyncStream() {
     };
 
     const disconnect = () => {
+      isConnecting = false;
       if (reconnectTimer) {
         clearTimeout(reconnectTimer);
         reconnectTimer = null;
@@ -149,19 +153,27 @@ export function useSyncStream() {
     };
 
     const connect = () => {
-      if (isCleanedUp || eventSource) return;
+      if (isCleanedUp || eventSource || isConnecting) return;
       if (document.visibilityState === "hidden") return;
+
+      isConnecting = true;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
 
       const clientId = getClientId();
       const url = `/api/sync?clientId=${encodeURIComponent(clientId)}`;
 
-      eventSource = new EventSource(url);
+      const es = new EventSource(url);
+      eventSource = es;
 
-      eventSource.onopen = () => {
+      es.onopen = () => {
+        isConnecting = false;
         reconnectDelay = 1000;
       };
 
-      eventSource.onmessage = (e) => {
+      es.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data) as SyncEventPayload;
           handleSyncEvent(data);
@@ -170,10 +182,12 @@ export function useSyncStream() {
         }
       };
 
-      eventSource.onerror = () => {
+      es.onerror = () => {
+        isConnecting = false;
         disconnect();
 
-        if (!isCleanedUp && document.visibilityState === "visible") {
+        // Only schedule retry if tab is actively visible and not in idle standby
+        if (!isCleanedUp && !isIdle && document.visibilityState === "visible") {
           reconnectTimer = setTimeout(() => {
             reconnectDelay = Math.min(reconnectDelay * 1.5, 15000);
             connect();
@@ -182,16 +196,26 @@ export function useSyncStream() {
       };
     };
 
-    const resetIdleTimer = () => {
+    let lastActivityTimestamp = 0;
+    const handleUserActivity = () => {
+      const now = Date.now();
+      // Throttle activity checks to once every 2 seconds
+      if (now - lastActivityTimestamp < 2000) return;
+      lastActivityTimestamp = now;
+
       if (idleTimer) clearTimeout(idleTimer);
 
-      // Reconnect if returning from idle state in active tab
-      if (!eventSource && document.visibilityState === "visible" && !isCleanedUp) {
-        connect();
-        queryClient.invalidateQueries();
+      // Reconnect only if returning from idle state in an active visible tab
+      if (isIdle) {
+        isIdle = false;
+        if (document.visibilityState === "visible" && !isCleanedUp) {
+          connect();
+          queryClient.invalidateQueries();
+        }
       }
 
       idleTimer = setTimeout(() => {
+        isIdle = true;
         disconnect();
       }, IDLE_DISCONNECT_MS);
     };
@@ -200,7 +224,8 @@ export function useSyncStream() {
       if (document.visibilityState === "hidden") {
         disconnect();
       } else if (document.visibilityState === "visible") {
-        resetIdleTimer();
+        isIdle = false;
+        handleUserActivity();
         connect();
         queryClient.invalidateQueries();
       }
@@ -213,21 +238,21 @@ export function useSyncStream() {
     // Event listeners
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("mousemove", resetIdleTimer, { passive: true });
-    window.addEventListener("keydown", resetIdleTimer, { passive: true });
-    window.addEventListener("touchstart", resetIdleTimer, { passive: true });
+    window.addEventListener("mousemove", handleUserActivity, { passive: true });
+    window.addEventListener("keydown", handleUserActivity, { passive: true });
+    window.addEventListener("touchstart", handleUserActivity, { passive: true });
 
-    // Initial connection
+    // Initial connection & idle timer setup
     connect();
-    resetIdleTimer();
+    handleUserActivity();
 
     return () => {
       isCleanedUp = true;
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("mousemove", resetIdleTimer);
-      window.removeEventListener("keydown", resetIdleTimer);
-      window.removeEventListener("touchstart", resetIdleTimer);
+      window.removeEventListener("mousemove", handleUserActivity);
+      window.removeEventListener("keydown", handleUserActivity);
+      window.removeEventListener("touchstart", handleUserActivity);
 
       if (idleTimer) clearTimeout(idleTimer);
       disconnect();

@@ -23,6 +23,13 @@ export async function GET(request: Request) {
   const clientId = searchParams.get("clientId") || "";
 
   const backendUrl = `${BACKEND_URL}/sync?clientId=${encodeURIComponent(clientId)}`;
+  const abortController = new AbortController();
+
+  if (request.signal) {
+    request.signal.addEventListener("abort", () => {
+      abortController.abort();
+    });
+  }
 
   try {
     const upstreamRes = await fetch(backendUrl, {
@@ -32,8 +39,7 @@ export async function GET(request: Request) {
         Accept: "text/event-stream",
         "x-client-id": clientId,
       },
-      // Pass client abort signal to cancel upstream when browser closes tab
-      signal: request.signal,
+      signal: abortController.signal,
     });
 
     if (!upstreamRes.ok || !upstreamRes.body) {
@@ -49,7 +55,31 @@ export async function GET(request: Request) {
       );
     }
 
-    return new Response(upstreamRes.body, {
+    // Pipe upstream stream through ReadableStream that aborts upstream fetch when client disconnects
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = upstreamRes.body!.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              controller.close();
+              break;
+            }
+            controller.enqueue(value);
+          }
+        } catch (err) {
+          controller.error(err);
+        } finally {
+          reader.releaseLock();
+        }
+      },
+      cancel() {
+        abortController.abort();
+      },
+    });
+
+    return new Response(stream, {
       status: 200,
       headers: {
         "Content-Type": "text/event-stream",
@@ -75,4 +105,3 @@ export async function GET(request: Request) {
     );
   }
 }
-
