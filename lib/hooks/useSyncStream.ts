@@ -24,10 +24,12 @@ interface SyncEventPayload {
   status?: "GENERATING" | "CHATTING" | "COMPLETED" | "IDLE";
 }
 
+const IDLE_DISCONNECT_MS = 5 * 60 * 1000; // 5 minutes inactivity timeout to permit serverless scale-to-zero
+
 /**
- * Real-time SSE synchronization hook.
- * Connects to Next.js BFF proxy `/api/sync` and invalidates TanStack Query keys
- * when other tabs or devices belonging to the user perform mutations.
+ * Real-time SSE synchronization hook with idle and visibility awareness.
+ * Connects to Next.js BFF proxy `/api/sync` and invalidates TanStack Query keys.
+ * Disconnects when the tab is hidden or idle to permit Railway scale-to-zero.
  */
 export function useSyncStream() {
   const queryClient = useQueryClient();
@@ -38,6 +40,7 @@ export function useSyncStream() {
 
     let eventSource: EventSource | null = null;
     let reconnectTimer: NodeJS.Timeout | null = null;
+    let idleTimer: NodeJS.Timeout | null = null;
     let reconnectDelay = 1000;
     let isCleanedUp = false;
 
@@ -134,8 +137,20 @@ export function useSyncStream() {
       }
     };
 
+    const disconnect = () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+
     const connect = () => {
-      if (isCleanedUp) return;
+      if (isCleanedUp || eventSource) return;
+      if (document.visibilityState === "hidden") return;
 
       const clientId = getClientId();
       const url = `/api/sync?clientId=${encodeURIComponent(clientId)}`;
@@ -143,7 +158,6 @@ export function useSyncStream() {
       eventSource = new EventSource(url);
 
       eventSource.onopen = () => {
-        // Reset reconnect delay on successful connection
         reconnectDelay = 1000;
       };
 
@@ -157,13 +171,9 @@ export function useSyncStream() {
       };
 
       eventSource.onerror = () => {
-        if (eventSource) {
-          eventSource.close();
-          eventSource = null;
-        }
+        disconnect();
 
-        if (!isCleanedUp) {
-          // Exponential backoff capped at 15s
+        if (!isCleanedUp && document.visibilityState === "visible") {
           reconnectTimer = setTimeout(() => {
             reconnectDelay = Math.min(reconnectDelay * 1.5, 15000);
             connect();
@@ -172,15 +182,56 @@ export function useSyncStream() {
       };
     };
 
+    const resetIdleTimer = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+
+      // Reconnect if returning from idle state in active tab
+      if (!eventSource && document.visibilityState === "visible" && !isCleanedUp) {
+        connect();
+        queryClient.invalidateQueries();
+      }
+
+      idleTimer = setTimeout(() => {
+        disconnect();
+      }, IDLE_DISCONNECT_MS);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        disconnect();
+      } else if (document.visibilityState === "visible") {
+        resetIdleTimer();
+        connect();
+        queryClient.invalidateQueries();
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      disconnect();
+    };
+
+    // Event listeners
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("mousemove", resetIdleTimer, { passive: true });
+    window.addEventListener("keydown", resetIdleTimer, { passive: true });
+    window.addEventListener("touchstart", resetIdleTimer, { passive: true });
+
+    // Initial connection
     connect();
+    resetIdleTimer();
 
     return () => {
       isCleanedUp = true;
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("mousemove", resetIdleTimer);
+      window.removeEventListener("keydown", resetIdleTimer);
+      window.removeEventListener("touchstart", resetIdleTimer);
+
+      if (idleTimer) clearTimeout(idleTimer);
+      disconnect();
+
       for (const timer of debounceTimersRef.current.values()) {
         clearTimeout(timer);
       }
@@ -188,4 +239,3 @@ export function useSyncStream() {
     };
   }, [queryClient]);
 }
-
