@@ -54,7 +54,7 @@ export function useSyncStream() {
       const timer = setTimeout(() => {
         debounceTimersRef.current.delete(serializedKey);
         queryClient.invalidateQueries({ queryKey: key });
-      }, 150);
+      }, 16);
 
       debounceTimersRef.current.set(serializedKey, timer);
     };
