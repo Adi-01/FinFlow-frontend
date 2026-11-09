@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FinFlow
 
-## Getting Started
+FinFlow is a personal finance and budget management platform designed to help you organize, monitor, and understand your everyday spending month by month.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Core Concept
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+FinFlow works on a monthly cycle. Instead of treating your money as an endless continuum, every month has its own dedicated starting allowance and balance tracking:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Starting Allowance:** Set an allocated budget at the beginning of each month.
+* **Live Balance Updates:** Adding an income source raises your balance immediately, while logging an expense lowers it.
+* **Automatic Month-to-Month Rollover:** Any leftover positive funds at the end of a month automatically carry over to become your new starting allowance for the next month.
+* **Global Currency Support:** Pick your preferred currency symbol (such as $, €, ₹, £, or ¥) during initial setup, and every balance, report, and ledger adapts to it.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Features and Workspaces
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Simple Onboarding
+* A guided first-time setup that captures your profile details and birth date for milestone tracking.
+* Choose your primary currency symbol before entering your dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Monthly Dashboard
+* A clear overview of your current monthly starting allowance, extra income, total expenses, remaining funds, and overall transaction count.
+* Month and year navigation controls to review past financial cycles or plan current ones.
+* Visual charts showing daily income versus expenses, expense distribution across categories, and income breakdowns by source.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Income and Expense Tracking
+* Dedicated tracking sections to record inflows and outflows with amount, category, date, payment method, and personal notes.
+* Immediate updates across your screen when adding, editing, or deleting an entry.
+* Quick filtering tools to sort and find records by date range, category, payment method, or search keywords.
 
-## Deploy on Vercel
+### 4. Master Transaction Ledger
+* A single, chronological list bringing together all your income and expense records side by side.
+* Visual color indicators distinguishing money coming in from money going out.
+* Deep filtering options, including min and max amount sliders, date presets, and direct spreadsheet exports to CSV.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5. AI Monthly Reflection and Financial Companion
+* Unlocks once you log at least 15 transactions in an active month.
+* Generates an empathetic monthly summary that celebrates smart spending choices without judgment.
+* Assigns a fun, memorable spending personality archetype based on your habits.
+* Provides detailed breakdowns of your primary spending categories, behavioral routines, and key purchases to note.
+* Recommends realistic, non-restrictive action points for your upcoming month.
+* Includes an interactive chat assistant where you can ask direct questions about your monthly report and spending patterns.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 6. Profile, Security, and Personalization
+* **Personal Settings:** Manage your display name, birth date, preferred currency, monthly starting allowance, default payment methods, and profile picture.
+* **Custom Collections:** Create custom income categories, expense categories, and payment methods with customized colors and icons.
+* **Cross-Device Sync:** Changes made on your phone or laptop appear across your other open devices right away.
+* **Session and Data Controls:** View and sign out of active logins across different devices and download your complete records at any time.
