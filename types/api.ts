@@ -122,6 +122,9 @@ export interface UserSettings {
   id: string;
   userId: string;
   currencySymbol: string;
+  monthlyStartingAllowance?: number;
+  defaultPaymentMethod?: string | null;
+  selectedMonth?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -147,8 +150,7 @@ export interface MonthlyAllowance {
 }
 
 export interface GetAllowanceResponse {
-  allowance: MonthlyAllowance | null;
-  needsPrompt: boolean;
+  allowance: MonthlyAllowance;
 }
 
 export interface SetAllowancePayload {
@@ -165,7 +167,6 @@ export interface AllowanceSummary {
   totalExpense: number;
   remainingBalance: number;
   extraIncome: number;
-  needsAllowancePrompt: boolean;
 }
 
 // ==========================================
@@ -432,7 +433,6 @@ export interface DashboardMetrics {
   year: number;
   month: number;
   allowance: MonthlyAllowance | null;
-  needsAllowancePrompt: boolean;
   summary: DashboardSummary;
   dailyAnalytics: DailyAnalyticItem[];
   expenseCategoryBreakdown: CategoryBreakdownItem[];

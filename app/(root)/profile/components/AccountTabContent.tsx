@@ -257,7 +257,7 @@ export function AccountTabContent() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-2 text-sm text-muted-foreground">
-                  <p>• Unlimited transactions and budget rollover</p>
+                  <p>• Unlimited transactions and monthly allowance tracking</p>
                   <p>• Advanced multi-filter ledger search</p>
                   <p>• Export in JSON and CSV formats</p>
                 </div>

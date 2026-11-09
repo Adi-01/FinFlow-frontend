@@ -30,7 +30,7 @@ export default function SignupPage() {
 
     if (result.success) {
       queryClient.clear();
-      router.push("/dashboard");
+      router.push("/onboarding");
       router.refresh();
     } else {
       setError(result.message);

@@ -64,7 +64,7 @@ export default async function LandingPage() {
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          FinFlow organizes your finances month-by-month with automatic rollover intelligence, real-time balance metrics, source breakdowns, and multi-filter transaction ledgers.
+          FinFlow organizes your finances month-by-month with baseline allowance tracking, real-time balance metrics, source breakdowns, and multi-filter transaction ledgers.
         </p>
 
         <div className="mt-8 flex items-center gap-3">
@@ -92,9 +92,9 @@ export default async function LandingPage() {
             <div className="mb-3.5 flex h-8 w-8 items-center justify-center rounded-md bg-muted text-foreground">
               <HugeiconsIcon icon={PiggyBankIcon} className="h-4 w-4" />
             </div>
-            <h3 className="mb-1 text-sm font-bold tracking-[-0.015em] text-foreground">Auto Rollover</h3>
+            <h3 className="mb-1 text-sm font-bold tracking-[-0.015em] text-foreground">Monthly Allowance</h3>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Surplus funds automatically carry over into your next month&apos;s starting allowance.
+              Your baseline allowance serves as the single source of truth for each month.
             </p>
           </div>
 

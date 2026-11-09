@@ -105,8 +105,8 @@ export function ProfileClient() {
     }
 
     const numericAllowance = Number(startingAllowance);
-    if (isNaN(numericAllowance) || numericAllowance < 0) {
-      setErrorMessage("Monthly starting allowance must be a valid positive number.");
+    if (isNaN(numericAllowance) || numericAllowance <= 0) {
+      setErrorMessage("Monthly starting allowance must be a valid number greater than zero.");
       return;
     }
 

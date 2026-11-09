@@ -47,8 +47,6 @@ export function useBudgetPreview({
     }
   }
 
-  const needsAllowancePrompt = summary?.needsAllowancePrompt ?? false;
-
   return {
     year,
     month,
@@ -60,6 +58,5 @@ export function useBudgetPreview({
     isOverBudget,
     overBudgetAmount,
     impactPercentage,
-    needsAllowancePrompt,
   };
 }

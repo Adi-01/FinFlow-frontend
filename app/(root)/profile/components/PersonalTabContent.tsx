@@ -160,12 +160,12 @@ export function PersonalTabContent({
               <Input
                 id="allowance"
                 type="number"
-                min="0"
+                min="0.01"
                 step="any"
                 value={startingAllowance}
                 onChange={(e) => setStartingAllowance(e.target.value)}
                 className="h-10 pl-7 text-sm bg-transparent"
-                placeholder="0"
+                placeholder="2000"
               />
             </div>
             <p className="text-[11px] text-muted-foreground">

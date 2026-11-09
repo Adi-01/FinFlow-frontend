@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 
@@ -13,7 +13,6 @@ interface BudgetImpactBannerProps {
   isOverBudget: boolean;
   overBudgetAmount: number;
   impactPercentage: number;
-  needsAllowancePrompt: boolean;
   isLoading?: boolean;
 }
 
@@ -26,7 +25,6 @@ export function BudgetImpactBanner({
   isOverBudget,
   overBudgetAmount,
   impactPercentage,
-  needsAllowancePrompt,
   isLoading,
 }: BudgetImpactBannerProps) {
   if (isLoading) {
@@ -58,14 +56,6 @@ export function BudgetImpactBanner({
 
   return (
     <div className="space-y-2">
-      {/* Unset Allowance Banner */}
-      {needsAllowancePrompt && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-700 dark:text-amber-400">
-          <Info className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-          <span>No starting allowance set for this month yet.</span>
-        </div>
-      )}
-
       {/* Main Budget Preview Card */}
       <div
         className={cn(

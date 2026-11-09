@@ -50,11 +50,18 @@ export function useUpdateProfile(onSuccessCallback?: () => void) {
             previousSettings?.currencySymbol ??
             "";
 
+      const effectiveAllowance =
+        payload.monthlyStartingAllowance !== undefined
+          ? payload.monthlyStartingAllowance
+          : previousProfile?.settings?.monthlyStartingAllowance ??
+            previousSettings?.monthlyStartingAllowance ??
+            0;
+
       let nextIsOnboarding =
         previousProfile?.isOnboarding ?? previousAuth?.isOnboarding ?? true;
 
       if (nextIsOnboarding) {
-        if (effectiveDob && effectiveCurrency !== "") {
+        if (effectiveDob && effectiveCurrency !== "" && effectiveAllowance > 0) {
           nextIsOnboarding = false;
         } else if (payload.isOnboarding !== undefined) {
           nextIsOnboarding = payload.isOnboarding;

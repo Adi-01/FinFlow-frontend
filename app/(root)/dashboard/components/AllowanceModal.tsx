@@ -37,10 +37,9 @@ export function AllowanceModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Set Starting Allowance</DialogTitle>
+          <DialogTitle>Update Monthly Allowance</DialogTitle>
           <DialogDescription>
-            Input the allocated starting allowance for{" "}
-            {formatMonthYear(year, month)}.
+            Adjust the starting allowance for {formatMonthYear(year, month)}.
           </DialogDescription>
         </DialogHeader>
 
@@ -53,8 +52,8 @@ export function AllowanceModal({
               id="allowanceInput"
               type="number"
               step="0.01"
-              min="0"
-              placeholder="3000.00"
+              min="0.01"
+              placeholder="2000.00"
               value={allowanceInput}
               onChange={(e) => setAllowanceInput(e.target.value)}
               required
@@ -71,7 +70,11 @@ export function AllowanceModal({
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={isPending}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isPending || !allowanceInput || parseFloat(allowanceInput) <= 0}
+            >
               {isPending ? "Saving..." : "Save Allowance"}
             </Button>
           </div>

@@ -31,6 +31,7 @@ export function OnboardingClient() {
 
   const [dob, setDob] = useState<string>("");
   const [currencySymbol, setCurrencySymbol] = useState<string>("$");
+  const [monthlyStartingAllowance, setMonthlyStartingAllowance] = useState<string>("2000");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,10 +60,17 @@ export function OnboardingClient() {
       return;
     }
 
+    const allowanceNum = parseFloat(monthlyStartingAllowance);
+    if (isNaN(allowanceNum) || allowanceNum <= 0) {
+      setErrorMessage("Please enter a valid monthly allowance greater than zero.");
+      return;
+    }
+
     updateProfile(
       {
         dob,
         currencySymbol,
+        monthlyStartingAllowance: allowanceNum,
         isOnboarding: false,
       },
       {
@@ -77,6 +85,9 @@ export function OnboardingClient() {
     );
   };
 
+  const isAllowanceValid =
+    Boolean(monthlyStartingAllowance) && parseFloat(monthlyStartingAllowance) > 0;
+
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-[380px] space-y-6">
@@ -85,7 +96,7 @@ export function OnboardingClient() {
             Profile setup
           </h1>
           <p className="text-xs text-muted-foreground">
-            Select your birth date and currency to continue
+            Configure your birth date, currency, and baseline monthly allowance
           </p>
         </div>
 
@@ -135,10 +146,36 @@ export function OnboardingClient() {
               </Select>
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="allowance" className="text-xs font-medium text-foreground">
+                Monthly allowance
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground select-none">
+                  {currencySymbol || "$"}
+                </span>
+                <Input
+                  id="allowance"
+                  type="number"
+                  min="1"
+                  step="any"
+                  value={monthlyStartingAllowance}
+                  onChange={(e) => setMonthlyStartingAllowance(e.target.value)}
+                  disabled={isPending}
+                  required
+                  placeholder="2000"
+                  className="h-8.5 pl-7 text-xs"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Your baseline monthly spending budget. You can adjust this anytime.
+              </p>
+            </div>
+
             <Button
               type="submit"
               variant="pill"
-              disabled={isPending || !dob || !currencySymbol}
+              disabled={isPending || !dob || !currencySymbol || !isAllowanceValid}
               className="w-full h-8.5 text-xs font-medium mt-2"
             >
               {isPending ? (

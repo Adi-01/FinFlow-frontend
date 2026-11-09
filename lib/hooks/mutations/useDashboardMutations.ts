@@ -60,7 +60,6 @@ export function useUpdateAllowance(
                   createdAt: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
                 },
-            needsAllowancePrompt: false,
             summary: {
               ...old.summary,
               startingAllowance: amount,
@@ -81,7 +80,6 @@ export function useUpdateAllowance(
             ...old,
             startingAllowance: amount,
             remainingBalance: old.remainingBalance + diff,
-            needsAllowancePrompt: false,
           };
         }
       );

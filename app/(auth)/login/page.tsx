@@ -29,7 +29,11 @@ export default function LoginPage() {
 
     if (result.success) {
       queryClient.clear();
+      if(result.user?.isOnboarding === true){
+        router.push("/onboarding")
+      } else {
       router.push("/dashboard");
+      }
       router.refresh();
     } else {
       setError(result.message);

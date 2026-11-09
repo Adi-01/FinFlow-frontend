@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { useDashboardMetrics } from "@/lib/hooks/queries/useDashboardQueries";
 import { useUpdateAllowance } from "@/lib/hooks/mutations/useDashboardMutations";
 import { DashboardHeader } from "./DashboardHeader";
@@ -33,7 +30,7 @@ export function DashboardClient() {
   const handleAllowanceSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const val = parseFloat(allowanceInput);
-    if (!isNaN(val) && val >= 0) {
+    if (!isNaN(val) && val > 0) {
       allowanceMutation.mutate(val);
     }
   };
@@ -52,32 +49,11 @@ export function DashboardClient() {
     dailyAnalytics,
     expenseCategoryBreakdown,
     incomeSourceBreakdown,
-    needsAllowancePrompt,
   } = dashboardData;
 
   return (
     <div className="space-y-6 pb-12">
       <DashboardHeader onAddTransaction={() => setIsAddTransactionModalOpen(true)} />
-
-      {/* Unset Month Allowance Banner */}
-      {needsAllowancePrompt && (
-        <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-400 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
-            <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 shrink-0 text-amber-500" />
-            <div className="text-xs">
-              <span className="block text-sm font-bold">Allowance Not Defined</span>
-              No starting allowance set for this month. Set an allowance to track your remaining balance accurately.
-            </div>
-          </div>
-          <Button
-            size="sm"
-            onClick={() => openAllowanceModal(summary.startingAllowance)}
-            className="shrink-0 bg-amber-500 font-bold text-white hover:bg-amber-600 dark:bg-amber-500 dark:text-amber-950 dark:hover:bg-amber-400 cursor-pointer"
-          >
-            Set Allowance
-          </Button>
-        </div>
-      )}
 
       <DashboardStats
         summary={summary}
